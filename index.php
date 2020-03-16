@@ -82,14 +82,25 @@ $app->get('/admin/users/:iduser/delete', function($iduser){
 
     User::verifyLogin();
 
+    $user = new User();
+    $user->get((int)$iduser);
+    $user->delete();
+
+    header("Location: /admin/users");
+    exit;
 });
 
 $app->get('/admin/users/:iduser', function($iduser){
 
     User::verifyLogin();
 
+    $user = new User();
+    $user->get((int)$iduser);
+
     $page = new PageAdmin();
-    $page->setTpl("users-update");
+    $page->setTpl("users-update", array(
+        "user" => $user->getValues()
+    ));
 
 });
 
@@ -113,7 +124,34 @@ $app->post('/admin/users/:iduser', function($iduser){
 
     User::verifyLogin();
 
+    $_POST["inadmin"] = (isset($_POST['inadmin']))?1:0;
+
+    $user = new User();
+    $user->get((int)$iduser);
+    $user->setData($_POST);
+    $user->update();
+
+    header("Location: /admin/users");
+    exit;
+
 });
+
+$app->get("/admin/forgot", function(){
+
+    $page = new PageAdmin([
+        "header"=> false,
+        "footer"=> false
+    ]);
+
+   $page->setTpl("forgot");
+
+});
+
+$app->post("/admin/forgot", function(){
+
+    $user = User::getForgot($_POST["email"]);
+    
+})
 
 $app->run();
 
